@@ -3,64 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Spoorzoeker Cloud ☁️</title>
+    <title>Spoorzoeker Cloud Pro 🏠🇮🇹</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     
     <style>
-        body { font-family: -apple-system, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; padding-bottom: 50px; }
-        .container { max-width: 450px; margin: auto; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #1c1e21; }
-        label { display: block; margin-top: 10px; font-weight: bold; font-size: 14px; color: #555; }
-        input, select { width: 100%; padding: 12px; margin: 5px 0 10px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
-        .photo-input-label { background-color: #e4e6eb; color: #4b4b4b; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; display: block; margin-bottom: 10px; font-weight: bold; border: 1px dashed #999; }
+        body { font-family: -apple-system, sans-serif; background-color: #f0f2f5; margin: 0; padding: 15px; padding-bottom: 50px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #1c1e21; margin-bottom: 10px; }
+        .status-online { color: #34c759; font-size: 11px; text-align: center; margin-bottom: 20px; font-weight: bold; }
+        
+        label { display: block; margin-top: 12px; font-weight: bold; font-size: 13px; color: #555; text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; margin: 5px 0 10px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; background-color: #f9f9f9; }
+        
+        .photo-input-label { background-color: #e4e6eb; color: #4b4b4b; padding: 15px; border-radius: 10px; text-align: center; cursor: pointer; display: block; margin-bottom: 10px; font-weight: bold; border: 1px dashed #999; }
         #photoPreview { width: 100%; height: auto; border-radius: 10px; margin-bottom: 15px; display: none; border: 2px solid #34c759; }
-        .add-btn { background-color: #34c759; color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 10px; }
-        .filter-section { background: #eef2f7; padding: 15px; border-radius: 15px; margin: 20px 0; }
-        .item-card { background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 12px; margin-bottom: 10px; display: flex; gap: 15px; align-items: center; border-left: 5px solid #007aff; }
-        .item-img { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; background: #f0f0f0; }
+        
+        .add-btn { background-color: #34c759; color: white; border: none; padding: 16px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 6px rgba(52, 199, 89, 0.2); }
+        
+        .filter-section { background: #eef2f7; padding: 15px; border-radius: 15px; margin: 25px 0; border: 1px solid #d1d9e6; }
+        
+        .item-card { background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 15px; margin-bottom: 12px; display: flex; gap: 12px; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .item-img { width: 75px; height: 75px; border-radius: 10px; object-fit: cover; background: #f0f0f0; flex-shrink: 0; }
         .item-info { flex-grow: 1; }
-        .item-info b { display: block; font-size: 16px; }
-        .category-tag { background: #e1f5fe; color: #01579b; padding: 2px 6px; border-radius: 5px; font-size: 10px; font-weight: bold; margin-top: 4px; display: inline-block; }
-        .delete-btn { background-color: #ff3b30; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; }
-        .status-online { color: #34c759; font-size: 12px; text-align: center; margin-bottom: 10px; }
+        .item-info b { display: block; font-size: 16px; color: #1c1e21; }
+        .item-info span { font-size: 13px; color: #65676b; display: block; margin-top: 2px; }
+        
+        .category-tag { background: #e7f3ff; color: #1877f2; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; margin-top: 6px; display: inline-block; }
+        
+        .delete-btn { background-color: #ffebee; color: #ff3b30; border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 18px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Spoorzoeker Cloud ☁️</h2>
-    <div class="status-online" id="status">● Verbonden met Cloud</div>
+    <h2>Spoorzoeker Cloud 🏠🇮🇹</h2>
+    <div class="status-online" id="status">● LIVE SYNCHRONISATIE ACTIEF</div>
     
     <label>Wat & Waar</label>
-    <input type="text" id="itemName" placeholder="Bijv. Grasmaaier">
-    <input type="text" id="itemLocation" placeholder="Bijv. Plank 1, Schuur">
+    <input type="text" id="itemName" placeholder="Bijv. Hogedrukreiniger">
+    <input type="text" id="itemLocation" placeholder="Bijv. Achterin de garage, plank 4">
     
+    <label>Locatie Woning</label>
     <select id="homeSelect">
         <option value="Doorn">Doorn 🇳🇱</option>
         <option value="Italie">Italië 🇮🇹</option>
     </select>
 
+    <label>Categorie</label>
     <select id="categorySelect">
-        <option value="Gereedschap">🛠️ Gereedschap</option>
-        <option value="Tuin">🌱 Tuin</option>
-        <option value="Keuken">🍳 Keuken</option>
-        <option value="Documenten">📄 Documenten</option>
-        <option value="Overig">📦 Overig</option>
+        <optgroup label="Garage & Klussen">
+            <option value="Handgereedschap">🛠️ Handgereedschap</option>
+            <option value="Elektrisch Gereedschap">🔌 Elektrisch Gereedschap</option>
+            <option value="IJzerwaren">🔩 IJzerwaren (Schroeven/Nagels)</option>
+            <option value="Verf & Onderhoud">🎨 Verf & Kwasten</option>
+            <option value="Auto & Fiets">🚲 Auto & Fiets</option>
+        </optgroup>
+        <optgroup label="Tuin & Buiten">
+            <option value="Tuinmachines">🚜 Tuinmachines (Maaier/Heggenschaar)</option>
+            <option value="Tuingereedschap">🪴 Tuingereedschap (Schep/Hark)</option>
+            <option value="Buitenmeubels">🪑 Buitenmeubels & Kussens</option>
+            <option value="Zwembad & Water">⛲ Zwembad & Besproeiing</option>
+        </optgroup>
+        <optgroup label="Huishouden">
+            <option value="Keuken & Koken">🍳 Keuken & Koken</option>
+            <option value="Schoonmaak">🧹 Schoonmaakmiddelen</option>
+            <option value="Apparatuur">📺 Elektrische Apparaten</option>
+            <option value="Meubels">🛋️ Meubels</option>
+            <option value="Textiel">🧺 Textiel (Beddengoed/Handdoeken)</option>
+        </optgroup>
+        <optgroup label="Opslag & Seizoen">
+            <option value="Kerst & Feest">🎄 Kerst & Feestartikelen</option>
+            <option value="Sport & Hobby">⚽ Sport & Hobby</option>
+            <option value="Camping & Vakantie">🏕️ Camping & Strand</option>
+            <option value="Documenten">📄 Belangrijke Documenten</option>
+            <option value="Overig">📦 Overig / Diversen</option>
+        </optgroup>
     </select>
 
-    <label for="photoFile" class="photo-input-label">📷 Foto maken/kiezen</label>
+    <label for="photoFile" class="photo-input-label">📷 Foto toevoegen (Optioneel)</label>
     <input type="file" id="photoFile" accept="image/*" capture="environment" style="display:none;" onchange="previewPhoto()">
     <img id="photoPreview">
 
-    <button class="add-btn" onclick="addItem()">In Cloud Opslaan</button>
+    <button class="add-btn" onclick="addItem()">In de Cloud Opslaan</button>
 
     <div class="filter-section">
+        <label>Filter op woning:</label>
         <select id="viewHome" onchange="renderList()">
-            <option value="Doorn">Bekijk Doorn 🇳🇱</option>
-            <option value="Italie">Bekijk Italië 🇮🇹</option>
+            <option value="Doorn">Alles in Doorn 🇳🇱</option>
+            <option value="Italie">Alles in Italië 🇮🇹</option>
         </select>
-        <input type="text" id="searchInput" onkeyup="renderList()" placeholder="🔍 Zoek op naam...">
+        <input type="text" id="searchInput" onkeyup="renderList()" placeholder="🔍 Zoek op naam (bijv. hamer)...">
     </div>
 
     <div id="itemList"></div>
@@ -78,7 +111,6 @@
       appId: "1:1071033479365:web:99598d603acc7d676440ac"
     };
 
-    // Initialiseer Firebase
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const itemsRef = database.ref('items');
@@ -86,18 +118,16 @@
     let inventory = [];
     let currentPhotoData = "";
 
-    // Foto verwerken
     function previewPhoto() {
         const file = document.getElementById('photoFile').files[0];
         const reader = new FileReader();
         const preview = document.getElementById('photoPreview');
-
         reader.onloadend = function() {
             const img = new Image();
             img.src = reader.result;
             img.onload = function() {
                 const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 300; // Iets kleiner voor snellere cloud sync
+                const MAX_WIDTH = 350;
                 const scaleSize = MAX_WIDTH / img.width;
                 canvas.width = MAX_WIDTH;
                 canvas.height = img.height * scaleSize;
@@ -111,50 +141,35 @@
         if (file) reader.readAsDataURL(file);
     }
 
-    // Toevoegen aan Firebase
     function addItem() {
         const name = document.getElementById('itemName').value;
         const loc = document.getElementById('itemLocation').value;
         const home = document.getElementById('homeSelect').value;
         const cat = document.getElementById('categorySelect').value;
-
         if (name.trim() === "" || loc.trim() === "") {
-            alert("Vul een naam en plek in.");
+            alert("Vul a.u.b. een naam en locatie in.");
             return;
         }
-
-        const newItem = {
-            name: name,
-            loc: loc,
-            home: home,
-            cat: cat,
-            photo: currentPhotoData,
-            timestamp: Date.now()
-        };
-
+        const newItem = { name, loc, home, cat, photo: currentPhotoData, timestamp: Date.now() };
         itemsRef.push(newItem).then(() => {
-            // Reset velden
             document.getElementById('itemName').value = '';
             document.getElementById('itemLocation').value = '';
             document.getElementById('photoPreview').style.display = 'none';
+            document.getElementById('photoFile').value = '';
             currentPhotoData = "";
         });
     }
 
-    // Verwijderen uit Firebase
     function deleteItem(id) {
-        if(confirm("Item definitief verwijderen voor iedereen?")) {
+        if(confirm("Weet je zeker dat je dit item wilt verwijderen uit de cloud?")) {
             database.ref('items/' + id).remove();
         }
     }
 
-    // Luister naar LIVE veranderingen in de database
     itemsRef.on('value', (snapshot) => {
         const data = snapshot.val();
         inventory = [];
-        for (let id in data) {
-            inventory.push({ id, ...data[id] });
-        }
+        for (let id in data) { inventory.push({ id, ...data[id] }); }
         renderList();
     });
 
@@ -163,17 +178,10 @@
         const viewHome = document.getElementById('viewHome').value;
         const searchQuery = document.getElementById('searchInput').value.toLowerCase();
         listDiv.innerHTML = '';
-
-        const filtered = inventory.filter(item => 
-            item.home === viewHome && 
-            item.name.toLowerCase().includes(searchQuery)
-        );
-
+        const filtered = inventory.filter(item => item.home === viewHome && item.name.toLowerCase().includes(searchQuery))
+                                  .sort((a, b) => b.timestamp - a.timestamp);
         filtered.forEach(item => {
-            const photoHtml = item.photo 
-                ? `<img src="${item.photo}" class="item-img">` 
-                : `<div class="item-img" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:#eee;">📦</div>`;
-            
+            const photoHtml = item.photo ? `<img src="${item.photo}" class="item-img">` : `<div class="item-img" style="display:flex;align-items:center;justify-content:center;font-size:30px;">📦</div>`;
             listDiv.innerHTML += `
                 <div class="item-card">
                     ${photoHtml}
@@ -185,6 +193,7 @@
                     <button class="delete-btn" onclick="deleteItem('${item.id}')">🗑️</button>
                 </div>`;
         });
+        if(filtered.length === 0) listDiv.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Geen spullen gevonden in deze woning.</p>';
     }
 </script>
 
