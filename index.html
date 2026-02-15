@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spoorzoeker Photo Pro</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; padding-bottom: 50px; }
+        .container { max-width: 450px; margin: auto; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #1c1e21; }
+        
+        label { display: block; margin-top: 10px; font-weight: bold; font-size: 14px; color: #555; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 5px 0 15px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
+        
+        .photo-input-label { background-color: #e4e6eb; color: #4b4b4b; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; display: block; margin-bottom: 15px; font-weight: bold; border: 1px dashed #999; }
+        #photoPreview { width: 100%; height: auto; border-radius: 10px; margin-bottom: 15px; display: none; }
+
+        .add-btn { background-color: #34c759; color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; }
+        
+        .filter-section { background: #eef2f7; padding: 15px; border-radius: 15px; margin: 20px 0; }
+        
+        .item-card { background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 12px; margin-bottom: 10px; display: flex; gap: 15px; align-items: center; border-left: 5px solid #007aff; }
+        .item-img { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; background: #eee; }
+        .item-info { flex-grow: 1; }
+        .item-info b { display: block; font-size: 16px; }
+        .category-tag { background: #e1f5fe; color: #01579b; padding: 2px 6px; border-radius: 5px; font-size: 10px; font-weight: bold; margin-top: 4px; display: inline-block; }
+        
+        .delete-btn { background-color: #ff3b30; color: white; border: none; padding: 8px 10px; border-radius: 8px; cursor: pointer; }
+
+        .backup-section { margin-top: 40px; padding: 15px; border: 2px dashed #ccc; border-radius: 15px; background: #fafafa; }
+        .backup-btn { background-color: #5856d6; color: white; border: none; padding: 10px; border-radius: 8px; margin-top: 10px; width: 100%; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Spoorzoeker 📸</h2>
+    
+    <label>Wat & Waar</label>
+    <input type="text" id="itemName" placeholder="Bijv. Gereedschapskist">
+    <input type="text" id="itemLocation" placeholder="Bijv. Plank 2, Garage">
+    
+    <label>Woning & Categorie</label>
+    <select id="homeSelect">
+        <option value="Doorn">Doorn 🇳🇱</option>
+        <option value="Italie">Italië 🇮🇹</option>
+    </select>
+
+    <select id="categorySelect">
+        <option value="Gereedschap">🛠️ Gereedschap</option>
+        <option value="Tuin">🌱 Tuin</option>
+        <option value="Keuken">🍳 Keuken</option>
+        <option value="Documenten">📄 Documenten</option>
+        <option value="Overig">📦 Overig</option>
+    </select>
+
+    <label>Foto toevoegen</label>
+    <label for="photoFile" class="photo-input-label">📷 Maak of kies een foto</label>
+    <input type="file" id="photoFile" accept="image/*" capture="environment" style="display:none;" onchange="previewPhoto()">
+    <img id="photoPreview">
+
+    <button class="add-btn" onclick="addItem()">Opslaan met Foto</button>
+
+    <div class="filter-section">
+        <select id="viewHome" onchange="renderList()">
+            <option value="Doorn">Bekijk Doorn 🇳🇱</option>
+            <option value="Italie">Bekijk Italië 🇮🇹</option>
+        </select>
+        <input type="text" id="searchInput" onkeyup="renderList()" placeholder="🔍 Zoek item...">
+    </div>
+
+    <div id="itemList"></div>
+
+    <div class="backup-section">
+        <h3>Systeembeheer</h3>
+        <textarea id="backupData" rows="3" readonly placeholder="Reservekopie code..."></textarea>
+        <button class="backup-btn" onclick="generateBackup()">Maak Reservekopie</button>
+    </div>
+</div>
+
+<script>
+    let inventory = JSON.parse(localStorage.getItem('houseInventoryPhoto')) || [];
+    let currentPhotoData = "";
+
+    function previewPhoto() {
+        const file = document.getElementById('photoFile').files[0];
+        const reader = new FileReader();
+        const preview = document.getElementById('photoPreview');
+
+        reader.onloadend = function() {
+            // Verklein de foto direct om opslag te besparen
+            const img = new Image();
+            img.src = reader.result;
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 400;
+                const scaleSize = MAX_WIDTH / img.width;
+                canvas.width = MAX_WIDTH;
+                canvas.height = img.height * scaleSize;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                currentPhotoData = canvas.toDataURL('image/jpeg', 0.7);
+                preview.src = currentPhotoData;
+                preview.style.display = 'block';
+            }
+        }
+        if (file) reader.readAsDataURL(file);
+    }
+
+    function addItem() {
+        const name = document.getElementById('itemName').value;
+        const loc = document.getElementById('itemLocation').value;
+        const home = document.getElementById('homeSelect').value;
+        const cat = document.getElementById('categorySelect').value;
+
+        if (name && loc) {
+            inventory.push({ id: Date.now(), name, loc, home, cat, photo: currentPhotoData });
+            saveAndRender();
+            // Reset velden
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemLocation').value = '';
+            document.getElementById('photoPreview').style.display = 'none';
+            currentPhotoData = "";
+        }
+    }
+
+    function deleteItem(id) {
+        if(confirm("Verwijderen?")) {
+            inventory = inventory.filter(item => item.id !== id);
+            saveAndRender();
+        }
+    }
+
+    function saveAndRender() {
+        localStorage.setItem('houseInventoryPhoto', JSON.stringify(inventory));
+        renderList();
+    }
+
+    function renderList() {
+        const listDiv = document.getElementById('itemList');
+        const viewHome = document.getElementById('viewHome').value;
+        const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+        listDiv.innerHTML = '';
+
+        const filtered = inventory.filter(item => item.home === viewHome && item.name.toLowerCase().includes(searchQuery));
+
+        filtered.forEach(item => {
+            const photoHtml = item.photo ? `<img src="${item.photo}" class="item-img">` : `<div class="item-img" style="display:flex;align-items:center;justify-content:center;font-size:24px;">📦</div>`;
+            
+            listDiv.innerHTML += `
+                <div class="item-card">
+                    ${photoHtml}
+                    <div class="item-info">
+                        <b>${item.name}</b>
+                        <span>📍 ${item.loc}</span>
+                        <span class="category-tag">${item.cat}</span>
+                    </div>
+                    <button class="delete-btn" onclick="deleteItem(${item.id})">🗑️</button>
+                </div>`;
+        });
+    }
+
+    function generateBackup() {
+        document.getElementById('backupData').value = JSON.stringify(inventory);
+        alert("Code klaar! Let op: met foto's is deze code erg lang.");
+    }
+
+    renderList();
+</script>
+
+</body>
+</html>
