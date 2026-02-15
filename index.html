@@ -3,42 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Spoorzoeker Pro</title>
+    <title>Spoorzoeker Cloud ☁️</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    
     <style>
         body { font-family: -apple-system, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; padding-bottom: 50px; }
         .container { max-width: 450px; margin: auto; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { text-align: center; color: #1c1e21; }
-        
         label { display: block; margin-top: 10px; font-weight: bold; font-size: 14px; color: #555; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 5px 0 15px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
-        
+        input, select { width: 100%; padding: 12px; margin: 5px 0 10px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
         .photo-input-label { background-color: #e4e6eb; color: #4b4b4b; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; display: block; margin-bottom: 10px; font-weight: bold; border: 1px dashed #999; }
         #photoPreview { width: 100%; height: auto; border-radius: 10px; margin-bottom: 15px; display: none; border: 2px solid #34c759; }
-
         .add-btn { background-color: #34c759; color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 10px; }
-        
         .filter-section { background: #eef2f7; padding: 15px; border-radius: 15px; margin: 20px 0; }
-        
         .item-card { background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 12px; margin-bottom: 10px; display: flex; gap: 15px; align-items: center; border-left: 5px solid #007aff; }
         .item-img { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; background: #f0f0f0; }
         .item-info { flex-grow: 1; }
-        .item-info b { display: block; font-size: 16px; color: #333; }
+        .item-info b { display: block; font-size: 16px; }
         .category-tag { background: #e1f5fe; color: #01579b; padding: 2px 6px; border-radius: 5px; font-size: 10px; font-weight: bold; margin-top: 4px; display: inline-block; }
-        
         .delete-btn { background-color: #ff3b30; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; }
-        .backup-section { margin-top: 40px; padding: 15px; border: 1px solid #ccc; border-radius: 15px; background: #fafafa; font-size: 13px; }
+        .status-online { color: #34c759; font-size: 12px; text-align: center; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Spoorzoeker 🏠🇮🇹</h2>
+    <h2>Spoorzoeker Cloud ☁️</h2>
+    <div class="status-online" id="status">● Verbonden met Cloud</div>
     
     <label>Wat & Waar</label>
     <input type="text" id="itemName" placeholder="Bijv. Grasmaaier">
     <input type="text" id="itemLocation" placeholder="Bijv. Plank 1, Schuur">
     
-    <label>Locatie & Categorie</label>
     <select id="homeSelect">
         <option value="Doorn">Doorn 🇳🇱</option>
         <option value="Italie">Italië 🇮🇹</option>
@@ -52,15 +49,13 @@
         <option value="Overig">📦 Overig</option>
     </select>
 
-    <label>Foto (Optioneel)</label>
     <label for="photoFile" class="photo-input-label">📷 Foto maken/kiezen</label>
     <input type="file" id="photoFile" accept="image/*" capture="environment" style="display:none;" onchange="previewPhoto()">
     <img id="photoPreview">
 
-    <button class="add-btn" onclick="addItem()">Item Opslaan</button>
+    <button class="add-btn" onclick="addItem()">In Cloud Opslaan</button>
 
     <div class="filter-section">
-        <label>Filter op woning:</label>
         <select id="viewHome" onchange="renderList()">
             <option value="Doorn">Bekijk Doorn 🇳🇱</option>
             <option value="Italie">Bekijk Italië 🇮🇹</option>
@@ -69,18 +64,29 @@
     </div>
 
     <div id="itemList"></div>
-
-    <div class="backup-section">
-        <strong>Systeembeheer</strong><br>
-        <button onclick="generateBackup()" style="margin-top:10px; width:100%;">Genereer Reservekopie Code</button>
-        <textarea id="backupData" style="margin-top:10px; font-size:10px;" rows="3" readonly></textarea>
-    </div>
 </div>
 
 <script>
-    let inventory = JSON.parse(localStorage.getItem('houseInventoryFinal')) || [];
-    let currentPhotoData = ""; // Blijft leeg als er geen foto is
+    // Jouw Firebase Configuratie
+    const firebaseConfig = {
+      apiKey: "AIzaSyD65pKXWIeJaTummFk19QmXciuOSaxyH7Y",
+      authDomain: "huisinventaris-cfc98.firebaseapp.com",
+      databaseURL: "https://huisinventaris-cfc98-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "huisinventaris-cfc98",
+      storageBucket: "huisinventaris-cfc98.firebasestorage.app",
+      messagingSenderId: "1071033479365",
+      appId: "1:1071033479365:web:99598d603acc7d676440ac"
+    };
 
+    // Initialiseer Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const itemsRef = database.ref('items');
+
+    let inventory = [];
+    let currentPhotoData = "";
+
+    // Foto verwerken
     function previewPhoto() {
         const file = document.getElementById('photoFile').files[0];
         const reader = new FileReader();
@@ -91,13 +97,13 @@
             img.src = reader.result;
             img.onload = function() {
                 const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 400;
+                const MAX_WIDTH = 300; // Iets kleiner voor snellere cloud sync
                 const scaleSize = MAX_WIDTH / img.width;
                 canvas.width = MAX_WIDTH;
                 canvas.height = img.height * scaleSize;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                currentPhotoData = canvas.toDataURL('image/jpeg', 0.7);
+                currentPhotoData = canvas.toDataURL('image/jpeg', 0.6);
                 preview.src = currentPhotoData;
                 preview.style.display = 'block';
             }
@@ -105,6 +111,7 @@
         if (file) reader.readAsDataURL(file);
     }
 
+    // Toevoegen aan Firebase
     function addItem() {
         const name = document.getElementById('itemName').value;
         const loc = document.getElementById('itemLocation').value;
@@ -112,41 +119,44 @@
         const cat = document.getElementById('categorySelect').value;
 
         if (name.trim() === "" || loc.trim() === "") {
-            alert("Vul tenminste een naam en een plek in.");
+            alert("Vul een naam en plek in.");
             return;
         }
 
-        // We slaan het item op, ook als currentPhotoData leeg is
-        inventory.push({ 
-            id: Date.now(), 
-            name: name, 
-            loc: loc, 
-            home: home, 
-            cat: cat, 
-            photo: currentPhotoData 
-        });
+        const newItem = {
+            name: name,
+            loc: loc,
+            home: home,
+            cat: cat,
+            photo: currentPhotoData,
+            timestamp: Date.now()
+        };
 
-        saveAndRender();
-        
-        // Reset alles voor het volgende item
-        document.getElementById('itemName').value = '';
-        document.getElementById('itemLocation').value = '';
-        document.getElementById('photoPreview').style.display = 'none';
-        document.getElementById('photoFile').value = '';
-        currentPhotoData = ""; 
+        itemsRef.push(newItem).then(() => {
+            // Reset velden
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemLocation').value = '';
+            document.getElementById('photoPreview').style.display = 'none';
+            currentPhotoData = "";
+        });
     }
 
+    // Verwijderen uit Firebase
     function deleteItem(id) {
-        if(confirm("Item verwijderen?")) {
-            inventory = inventory.filter(item => item.id !== id);
-            saveAndRender();
+        if(confirm("Item definitief verwijderen voor iedereen?")) {
+            database.ref('items/' + id).remove();
         }
     }
 
-    function saveAndRender() {
-        localStorage.setItem('houseInventoryFinal', JSON.stringify(inventory));
+    // Luister naar LIVE veranderingen in de database
+    itemsRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        inventory = [];
+        for (let id in data) {
+            inventory.push({ id, ...data[id] });
+        }
         renderList();
-    }
+    });
 
     function renderList() {
         const listDiv = document.getElementById('itemList');
@@ -160,7 +170,6 @@
         );
 
         filtered.forEach(item => {
-            // Als er geen foto is, tonen we een pakketje-icoon
             const photoHtml = item.photo 
                 ? `<img src="${item.photo}" class="item-img">` 
                 : `<div class="item-img" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:#eee;">📦</div>`;
@@ -173,21 +182,10 @@
                         <span>📍 ${item.loc}</span>
                         <span class="category-tag">${item.cat}</span>
                     </div>
-                    <button class="delete-btn" onclick="deleteItem(${item.id})">🗑️</button>
+                    <button class="delete-btn" onclick="deleteItem('${item.id}')">🗑️</button>
                 </div>`;
         });
-
-        if(filtered.length === 0) {
-            listDiv.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Geen items gevonden.</p>';
-        }
     }
-
-    function generateBackup() {
-        document.getElementById('backupData').value = JSON.stringify(inventory);
-        alert("Code gegenereerd in het tekstvak hieronder.");
-    }
-
-    renderList();
 </script>
 
 </body>
