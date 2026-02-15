@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Spoorzoeker Photo Pro</title>
+    <title>Spoorzoeker Pro</title>
     <style>
         body { font-family: -apple-system, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; padding-bottom: 50px; }
         .container { max-width: 450px; margin: auto; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -12,35 +12,33 @@
         label { display: block; margin-top: 10px; font-weight: bold; font-size: 14px; color: #555; }
         input, select, textarea { width: 100%; padding: 12px; margin: 5px 0 15px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
         
-        .photo-input-label { background-color: #e4e6eb; color: #4b4b4b; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; display: block; margin-bottom: 15px; font-weight: bold; border: 1px dashed #999; }
-        #photoPreview { width: 100%; height: auto; border-radius: 10px; margin-bottom: 15px; display: none; }
+        .photo-input-label { background-color: #e4e6eb; color: #4b4b4b; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; display: block; margin-bottom: 10px; font-weight: bold; border: 1px dashed #999; }
+        #photoPreview { width: 100%; height: auto; border-radius: 10px; margin-bottom: 15px; display: none; border: 2px solid #34c759; }
 
-        .add-btn { background-color: #34c759; color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; }
+        .add-btn { background-color: #34c759; color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 10px; }
         
         .filter-section { background: #eef2f7; padding: 15px; border-radius: 15px; margin: 20px 0; }
         
         .item-card { background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 12px; margin-bottom: 10px; display: flex; gap: 15px; align-items: center; border-left: 5px solid #007aff; }
-        .item-img { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; background: #eee; }
+        .item-img { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; background: #f0f0f0; }
         .item-info { flex-grow: 1; }
-        .item-info b { display: block; font-size: 16px; }
+        .item-info b { display: block; font-size: 16px; color: #333; }
         .category-tag { background: #e1f5fe; color: #01579b; padding: 2px 6px; border-radius: 5px; font-size: 10px; font-weight: bold; margin-top: 4px; display: inline-block; }
         
-        .delete-btn { background-color: #ff3b30; color: white; border: none; padding: 8px 10px; border-radius: 8px; cursor: pointer; }
-
-        .backup-section { margin-top: 40px; padding: 15px; border: 2px dashed #ccc; border-radius: 15px; background: #fafafa; }
-        .backup-btn { background-color: #5856d6; color: white; border: none; padding: 10px; border-radius: 8px; margin-top: 10px; width: 100%; cursor: pointer; }
+        .delete-btn { background-color: #ff3b30; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; }
+        .backup-section { margin-top: 40px; padding: 15px; border: 1px solid #ccc; border-radius: 15px; background: #fafafa; font-size: 13px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Spoorzoeker 📸</h2>
+    <h2>Spoorzoeker 🏠🇮🇹</h2>
     
     <label>Wat & Waar</label>
-    <input type="text" id="itemName" placeholder="Bijv. Gereedschapskist">
-    <input type="text" id="itemLocation" placeholder="Bijv. Plank 2, Garage">
+    <input type="text" id="itemName" placeholder="Bijv. Grasmaaier">
+    <input type="text" id="itemLocation" placeholder="Bijv. Plank 1, Schuur">
     
-    <label>Woning & Categorie</label>
+    <label>Locatie & Categorie</label>
     <select id="homeSelect">
         <option value="Doorn">Doorn 🇳🇱</option>
         <option value="Italie">Italië 🇮🇹</option>
@@ -54,33 +52,34 @@
         <option value="Overig">📦 Overig</option>
     </select>
 
-    <label>Foto toevoegen</label>
-    <label for="photoFile" class="photo-input-label">📷 Maak of kies een foto</label>
+    <label>Foto (Optioneel)</label>
+    <label for="photoFile" class="photo-input-label">📷 Foto maken/kiezen</label>
     <input type="file" id="photoFile" accept="image/*" capture="environment" style="display:none;" onchange="previewPhoto()">
     <img id="photoPreview">
 
-    <button class="add-btn" onclick="addItem()">Opslaan met Foto</button>
+    <button class="add-btn" onclick="addItem()">Item Opslaan</button>
 
     <div class="filter-section">
+        <label>Filter op woning:</label>
         <select id="viewHome" onchange="renderList()">
             <option value="Doorn">Bekijk Doorn 🇳🇱</option>
             <option value="Italie">Bekijk Italië 🇮🇹</option>
         </select>
-        <input type="text" id="searchInput" onkeyup="renderList()" placeholder="🔍 Zoek item...">
+        <input type="text" id="searchInput" onkeyup="renderList()" placeholder="🔍 Zoek op naam...">
     </div>
 
     <div id="itemList"></div>
 
     <div class="backup-section">
-        <h3>Systeembeheer</h3>
-        <textarea id="backupData" rows="3" readonly placeholder="Reservekopie code..."></textarea>
-        <button class="backup-btn" onclick="generateBackup()">Maak Reservekopie</button>
+        <strong>Systeembeheer</strong><br>
+        <button onclick="generateBackup()" style="margin-top:10px; width:100%;">Genereer Reservekopie Code</button>
+        <textarea id="backupData" style="margin-top:10px; font-size:10px;" rows="3" readonly></textarea>
     </div>
 </div>
 
 <script>
-    let inventory = JSON.parse(localStorage.getItem('houseInventoryPhoto')) || [];
-    let currentPhotoData = "";
+    let inventory = JSON.parse(localStorage.getItem('houseInventoryFinal')) || [];
+    let currentPhotoData = ""; // Blijft leeg als er geen foto is
 
     function previewPhoto() {
         const file = document.getElementById('photoFile').files[0];
@@ -88,7 +87,6 @@
         const preview = document.getElementById('photoPreview');
 
         reader.onloadend = function() {
-            // Verklein de foto direct om opslag te besparen
             const img = new Image();
             img.src = reader.result;
             img.onload = function() {
@@ -113,26 +111,40 @@
         const home = document.getElementById('homeSelect').value;
         const cat = document.getElementById('categorySelect').value;
 
-        if (name && loc) {
-            inventory.push({ id: Date.now(), name, loc, home, cat, photo: currentPhotoData });
-            saveAndRender();
-            // Reset velden
-            document.getElementById('itemName').value = '';
-            document.getElementById('itemLocation').value = '';
-            document.getElementById('photoPreview').style.display = 'none';
-            currentPhotoData = "";
+        if (name.trim() === "" || loc.trim() === "") {
+            alert("Vul tenminste een naam en een plek in.");
+            return;
         }
+
+        // We slaan het item op, ook als currentPhotoData leeg is
+        inventory.push({ 
+            id: Date.now(), 
+            name: name, 
+            loc: loc, 
+            home: home, 
+            cat: cat, 
+            photo: currentPhotoData 
+        });
+
+        saveAndRender();
+        
+        // Reset alles voor het volgende item
+        document.getElementById('itemName').value = '';
+        document.getElementById('itemLocation').value = '';
+        document.getElementById('photoPreview').style.display = 'none';
+        document.getElementById('photoFile').value = '';
+        currentPhotoData = ""; 
     }
 
     function deleteItem(id) {
-        if(confirm("Verwijderen?")) {
+        if(confirm("Item verwijderen?")) {
             inventory = inventory.filter(item => item.id !== id);
             saveAndRender();
         }
     }
 
     function saveAndRender() {
-        localStorage.setItem('houseInventoryPhoto', JSON.stringify(inventory));
+        localStorage.setItem('houseInventoryFinal', JSON.stringify(inventory));
         renderList();
     }
 
@@ -142,10 +154,16 @@
         const searchQuery = document.getElementById('searchInput').value.toLowerCase();
         listDiv.innerHTML = '';
 
-        const filtered = inventory.filter(item => item.home === viewHome && item.name.toLowerCase().includes(searchQuery));
+        const filtered = inventory.filter(item => 
+            item.home === viewHome && 
+            item.name.toLowerCase().includes(searchQuery)
+        );
 
         filtered.forEach(item => {
-            const photoHtml = item.photo ? `<img src="${item.photo}" class="item-img">` : `<div class="item-img" style="display:flex;align-items:center;justify-content:center;font-size:24px;">📦</div>`;
+            // Als er geen foto is, tonen we een pakketje-icoon
+            const photoHtml = item.photo 
+                ? `<img src="${item.photo}" class="item-img">` 
+                : `<div class="item-img" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:#eee;">📦</div>`;
             
             listDiv.innerHTML += `
                 <div class="item-card">
@@ -158,11 +176,15 @@
                     <button class="delete-btn" onclick="deleteItem(${item.id})">🗑️</button>
                 </div>`;
         });
+
+        if(filtered.length === 0) {
+            listDiv.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Geen items gevonden.</p>';
+        }
     }
 
     function generateBackup() {
         document.getElementById('backupData').value = JSON.stringify(inventory);
-        alert("Code klaar! Let op: met foto's is deze code erg lang.");
+        alert("Code gegenereerd in het tekstvak hieronder.");
     }
 
     renderList();
